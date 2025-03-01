@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -17,5 +18,10 @@ namespace OwlControlCenter;
 public partial class MainWindow : Window {
     public MainWindow() {
         InitializeComponent();
+    }
+    
+    private void MainWindow_OnClosing(object? sender, CancelEventArgs e) {
+        e.Cancel = true;
+        Hide();
     }
 }

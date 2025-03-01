@@ -6,6 +6,12 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
+        <UseWindowsForms>true</UseWindowsForms>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="Resources\free-icon-volume-bars-5759527.ico" />
+      <EmbeddedResource Include="Resources\icon.ico" />
+    </ItemGroup>
 
 </Project>
