@@ -18,6 +18,8 @@ namespace OwlControlCenter;
 public partial class MainWindow : Window {
     public MainWindow() {
         InitializeComponent();
+        MainWindowVm vm = new MainWindowVm();
+        DataContext = vm;
     }
     
     private void MainWindow_OnClosing(object? sender, CancelEventArgs e) {
