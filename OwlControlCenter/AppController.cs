@@ -5,8 +5,33 @@ using NAudio.CoreAudioApi;
 namespace OwlControlCenter;
 
 public class AppController {
-    private Process[] _processes {
+    private Process[] processes {
         get => GetProcessByName(processName);
+    }
+
+    private FunctionType type;
+
+    private float signalLevel;
+
+    public float SignalLevel {
+        get => signalLevel;
+        set {
+            if (Math.Abs(signalLevel - value) < 0.01) return;
+            value = (float)Math.Round(value, 2);
+            signalLevel = value;
+            switch (type) {
+                case FunctionType.Execute:
+                    if (signalLevel < 50) CloseApp();
+                    else {
+                        StartApp();
+                    }
+
+                    break;
+                case FunctionType.Volume:
+                    SetAppVolume(signalLevel);
+                    break;
+            }
+        }
     }
 
     public string AppPath { get; }
@@ -15,8 +40,9 @@ public class AppController {
         get => System.IO.Path.GetFileNameWithoutExtension(AppPath);
     }
 
-    public AppController(string appPath) {
+    public AppController(string appPath, FunctionType type) {
         AppPath = appPath;
+        this.type = type;
     }
 
     public Process[] GetProcessByName(string processName) {
@@ -39,9 +65,9 @@ public class AppController {
 
     public void CloseApp() {
         try {
-            foreach (var _process in _processes) {
-                _process.CloseMainWindow();
-                _process.Close();
+            foreach (var process in processes) {
+                process.CloseMainWindow();
+                process.Close();
             }
         } catch (Exception ex) {
             MessageBox.Show($"Ошибка при закрытии приложения {processName}", "Ошибка запуска",
@@ -57,11 +83,11 @@ public class AppController {
         try {
             var enumerator = new MMDeviceEnumerator();
             var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            
+
             for (int i = 0; i < device.AudioSessionManager.Sessions.Count; i++) {
-                foreach (var _process in _processes) {
+                foreach (var process in processes) {
                     var session = device.AudioSessionManager.Sessions[i];
-                    if (session.GetProcessID == _process.Id) {
+                    if (session.GetProcessID == process.Id) {
                         session.SimpleAudioVolume.Volume = volume;
                         return;
                     }
