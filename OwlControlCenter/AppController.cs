@@ -5,6 +5,7 @@ using NAudio.CoreAudioApi;
 namespace OwlControlCenter;
 
 public class AppController {
+    private const float EXECUTE_LEVEL = 0.9f;
     private Process[] Processes => GetProcessByName(ProcessName);
 
     public FunctionType Type;
@@ -17,18 +18,19 @@ public class AppController {
             value /= 1000;
             if (Math.Abs(signalLevel - value) < 0.01) return;
             value = (float)Math.Round(value, 2);
-            signalLevel = value;
             switch (Type) {
                 case FunctionType.Execute:
-                    if (signalLevel > 0.9) StartApp();
+                    if (value >= EXECUTE_LEVEL && signalLevel < EXECUTE_LEVEL) StartApp();
                     break;
                 case FunctionType.Close:
-                    if (signalLevel > 0.9) CloseApp();
+                    if (value >= EXECUTE_LEVEL && signalLevel < EXECUTE_LEVEL) CloseApp();
                     break;
                 case FunctionType.Volume:
                     SetAppVolume(signalLevel);
                     break;
             }
+            
+            signalLevel = value;
         }
     }
 
