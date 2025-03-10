@@ -8,11 +8,11 @@ public class ConfigManager {
 
     public ConfigManager() {
         if (!File.Exists(configFilePath)) {
-            SaveConfig([]); // Сохраняем настройки по умолчанию
+            SaveConfig(new Config()); // Сохраняем настройки по умолчанию
         }
     }
 
-    public void SaveConfig(AppController[] config) {
+    public void SaveConfig(Config config) {
         try {
             string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(configFilePath, json);
@@ -22,14 +22,20 @@ public class ConfigManager {
         }
     }
 
-    public AppController[]? GetConfig() {
+    public Config GetConfig() {
         try {
             string json = File.ReadAllText(configFilePath);
-            return JsonSerializer.Deserialize<AppController[]>(json);
+            return JsonSerializer.Deserialize<Config>(json);
         } catch (Exception ex) {
             MessageBox.Show($"Ошибка при загрузки конфигурации!", "Ошибка загрузки",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return [];
+            return new Config();
         }
     }
+}
+
+public class Config {
+    public List<AppController> AppControllers { get; set; }
+    public string PortName { get; set; }
+    public int BaudRate { get; set; } = 9600;
 }

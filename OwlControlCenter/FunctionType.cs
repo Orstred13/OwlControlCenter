@@ -3,5 +3,6 @@
 public enum FunctionType {
     Volume,
     Execute,
-    Close
+    Close,
+    None
 }

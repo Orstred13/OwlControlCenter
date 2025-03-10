@@ -15,6 +15,8 @@ public class AppController {
     public float SignalLevel {
         get => signalLevel;
         set {
+            if (string.IsNullOrEmpty(AppPath)) return;
+            
             value /= 1000;
             if (Math.Abs(signalLevel - value) < 0.01) return;
             value = (float)Math.Round(value, 2);
@@ -29,7 +31,7 @@ public class AppController {
                     SetAppVolume(signalLevel);
                     break;
             }
-            
+
             signalLevel = value;
         }
     }
@@ -44,15 +46,19 @@ public class AppController {
     }
 
     public Process[] GetProcessByName(string processName) {
+        if (string.IsNullOrEmpty(processName)) return [];
+
         Process[] processes = Process.GetProcessesByName(processName);
         if (processes.Length > 0) {
             return processes;
-        } else {
-            return null;
         }
+
+        return [];
     }
 
     public void StartApp() {
+        if (string.IsNullOrEmpty(AppPath)) return;
+
         try {
             Process.Start(AppPath);
         } catch (Exception ex) {
@@ -62,6 +68,8 @@ public class AppController {
     }
 
     public void CloseApp() {
+        if (string.IsNullOrEmpty(AppPath)) return;
+
         try {
             foreach (var process in Processes) {
                 process.CloseMainWindow();
@@ -74,6 +82,8 @@ public class AppController {
     }
 
     public void SetAppVolume(float volume) {
+        if (string.IsNullOrEmpty(AppPath)) return;
+
         if (volume < 0.0f) {
             volume = 0.0f;
         }
