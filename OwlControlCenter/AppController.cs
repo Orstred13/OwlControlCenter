@@ -1,10 +1,12 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Windows.Shapes;
 using NAudio.CoreAudioApi;
 
 namespace OwlControlCenter;
 
-public class AppController {
+public class AppController : INotifyPropertyChanged {
     private const float EXECUTE_LEVEL = 0.9f;
     private Process[] Processes => GetProcessByName(ProcessName);
 
@@ -32,7 +34,7 @@ public class AppController {
                     break;
             }
 
-            signalLevel = value;
+            SetField(ref signalLevel, value);
         }
     }
 
@@ -108,5 +110,18 @@ public class AppController {
         } catch (Exception ex) {
             Console.WriteLine($"Ошибка при установке громкости: {ex.Message}");
         }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null) {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
 }
