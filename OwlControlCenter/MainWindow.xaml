@@ -146,6 +146,32 @@
                 GridLinesVisibility="None">
 
                 <DataGrid.Resources>
+                    <!-- Общий стиль текста -->
+                    <Style TargetType="TextBlock" x:Key="GridTextStyle">
+                        <Setter Property="FontFamily" Value="Segoe UI" />
+                        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                    </Style>
+
+                    <!-- Стиль ячеек для средней колонки -->
+                    <Style x:Key="MiddleColumnCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridCell">
+                                    <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1 0 1 0">
+                                        <Grid Background="{TemplateBinding Background}">
+                                            <ContentPresenter
+                                                Margin="{TemplateBinding Padding}"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Left"
+                                                TextElement.Foreground="{TemplateBinding Foreground}" />
+                                        </Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    
                     <!-- Стиль заголовков -->
                     <Style TargetType="DataGridColumnHeader">
                         <Setter Property="IsHitTestVisible" Value="False" />
@@ -252,10 +278,17 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTextColumn 
+                    <DataGridTemplateColumn 
                         Header="Уровень сигнала"
-                        Binding="{Binding SignalLevel}"
-                        Width="*"/>
+                        Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    Text="{Binding SignalLevel}"
+                                    Style="{StaticResource LabelStyle}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
