@@ -9,13 +9,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Helium.Controls.Window;
 
 namespace OwlControlCenter;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : Window {
+public partial class MainWindow : HeWindow {
     public MainWindow() {
         InitializeComponent();
         MainWindowVm vm = new MainWindowVm();
@@ -25,5 +26,10 @@ public partial class MainWindow : Window {
     private void MainWindow_OnClosing(object? sender, CancelEventArgs e) {
         e.Cancel = true;
         Hide();
+    }
+
+    private void DataGrid_SelectionChanged(object sender, SelectedCellsChangedEventArgs selectedCellsChangedEventArgs) {
+        var dataGrid = sender as DataGrid;
+        dataGrid.UnselectAllCells();
     }
 }

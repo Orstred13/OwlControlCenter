@@ -47,24 +47,36 @@ public class ComPortListener : IDisposable {
     }
 
     private async Task ListenToPortAsync(CancellationToken cancellationToken) {
-        string message = string.Empty;
+        StringBuilder dataBuffer = new StringBuilder();
 
         while (isListening && !cancellationToken.IsCancellationRequested) {
             try {
                 if (serialPort.BytesToRead > 0) {
-                    var readByte = serialPort.BaseStream.ReadByte();
-                    if (readByte != '\n') {
-                        message += Encoding.ASCII.GetString(new[] { (byte)readByte });
-                    } else {
-                        if (isFirstRead) {
-                            isFirstRead = false;
-                            continue;
-                        }
+                    byte[] buffer = new byte[2048];
+                    int bytesRead = await serialPort.BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+                    if (bytesRead > 0) {
+                        string dataChunk = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                        dataBuffer.Append(dataChunk);
+
+                        int newLineIndex = dataBuffer.ToString().IndexOf('\n');
+                        if (newLineIndex >= 0) {
+                            string[] splitMessage = dataBuffer.ToString().Substring(newLineIndex + 1).Split("\r\n");
+                            if (splitMessage.Length < 3) continue;
+                            string completeMessage = splitMessage[0];
                             
-                        OnDataReceived(message);
+
+                            if (isFirstRead) {
+                                isFirstRead = false;
+                                continue;
+                            }
+
+                            OnDataReceived(completeMessage);
+                            dataBuffer.Clear();
+                            serialPort.DiscardInBuffer();
+                        }
                     }
                 } else {
-                    await Task.Delay(100, cancellationToken);
+                    await Task.Delay(10, cancellationToken);
                 }
             } catch (OperationCanceledException) {
                 break;

@@ -5,19 +5,32 @@ using System.Runtime.CompilerServices;
 namespace OwlControlCenter;
 
 public class MainWindowModel : INotifyPropertyChanged {
-    private ConfigManager configManager;
-    private Config config;
+    public ConfigManager ConfigManager;
+    public Config Config { get; set; }
 
-    private List<AppController> appControllers {
-        get => config.AppControllers;
-        set => config.AppControllers = value;
+    private ComPortListener comPortListener;
+
+    public string PortName {
+        get => Config.PortName;
+        set => Config.PortName = value;
+    }
+
+    public int BaudRate {
+        get => Config.BaudRate;
+        set => Config.BaudRate = value;
+    }
+
+    public List<AppController> AppControllers {
+        get => Config.AppControllers;
+        set => Config.AppControllers = value;
     }
 
     public MainWindowModel() {
-        configManager = new ConfigManager();
-        config = configManager.GetConfig();
-        if (!string.IsNullOrEmpty(config.PortName)) {
-            var comPortListener = new ComPortListener(config.PortName, config.BaudRate);
+        ConfigManager = new ConfigManager();
+        Config = ConfigManager.GetConfig();
+        if (AppControllers == null) AppControllers = new List<AppController>();
+        if (!string.IsNullOrEmpty(PortName)) {
+            comPortListener = new ComPortListener(PortName, BaudRate);
             comPortListener.DataReceived += GetData;
 
             Task.Run(() => comPortListener.StartListeningAsync());
@@ -31,18 +44,36 @@ public class MainWindowModel : INotifyPropertyChanged {
         
         string[] appData = data.Split('|');
         
-        int count = appData.Length - appControllers.Count;
+        int count = appData.Length - AppControllers.Count;
         if (count > 0) {
-            appControllers.AddRange(Enumerable.Repeat(new AppController("", FunctionType.None), count));
-            configManager.SaveConfig(config);
+            AppControllers.AddRange(Enumerable.Repeat(new AppController("", FunctionType.None), count));
+            ConfigManager.SaveConfig(Config);
         }
         
-        for (int i = 0; i < appControllers.Count; i++) {
+        for (int i = 0; i < AppControllers.Count; i++) {
             if (!float.TryParse(appData[i], NumberStyles.Float, CultureInfo.InvariantCulture, out float signalLevel)) {
                 throw new FormatException($"Неверный формат данных: {appData[i]}");
             }
 
-            appControllers[i].SignalLevel = signalLevel;
+            if (!AppControllers[i].IsReady) AppControllers[i].IsReady = true;
+            AppControllers[i].SignalLevel = signalLevel;
+        }
+    }
+
+    public void ApplyConfig() {
+        ConfigManager.SaveConfig(Config);
+    }
+
+    public void Rerun() {
+        comPortListener.StopListening();
+        comPortListener.Dispose();
+        
+        if (AppControllers == null) AppControllers = new List<AppController>();
+        if (!string.IsNullOrEmpty(PortName)) {
+            comPortListener = new ComPortListener(PortName, BaudRate);
+            comPortListener.DataReceived += GetData;
+
+            Task.Run(() => comPortListener.StartListeningAsync());
         }
     }
 

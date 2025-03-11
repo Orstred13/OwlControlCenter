@@ -36,6 +36,6 @@ public class ConfigManager {
 
 public class Config {
     public List<AppController> AppControllers { get; set; }
-    public string PortName { get; set; }
+    public string PortName { get; set; } = "COM7";
     public int BaudRate { get; set; } = 9600;
 }
