@@ -127,7 +127,7 @@
             Background="{StaticResource BlackBrush700}">
              
             <DataGrid
-                ItemsSource="{Binding AppControllers}"
+                ItemsSource="{Binding AppControllers, UpdateSourceTrigger=PropertyChanged}"
                 AutoGenerateColumns="False"
                 HeadersVisibility="Column"
                 RowHeaderWidth="0"

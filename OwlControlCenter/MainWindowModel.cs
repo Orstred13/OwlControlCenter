@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
@@ -20,7 +21,7 @@ public class MainWindowModel : INotifyPropertyChanged {
         set => Config.BaudRate = value;
     }
 
-    public List<AppController> AppControllers {
+    public ObservableCollection<AppController> AppControllers {
         get => Config.AppControllers;
         set => Config.AppControllers = value;
     }
@@ -28,7 +29,7 @@ public class MainWindowModel : INotifyPropertyChanged {
     public MainWindowModel() {
         ConfigManager = new ConfigManager();
         Config = ConfigManager.GetConfig();
-        if (AppControllers == null) AppControllers = new List<AppController>();
+        if (AppControllers == null) AppControllers = new ObservableCollection<AppController>();
         if (!string.IsNullOrEmpty(PortName)) {
             comPortListener = new ComPortListener(PortName, BaudRate);
             comPortListener.DataReceived += GetData;
@@ -46,7 +47,13 @@ public class MainWindowModel : INotifyPropertyChanged {
         
         int count = appData.Length - AppControllers.Count;
         if (count > 0) {
-            AppControllers.AddRange(Enumerable.Repeat(new AppController("", FunctionType.None), count));
+            for (int i = 0; i < count; i++) {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                AppControllers.Add(new AppController("", FunctionType.None));
+                });
+            }
+            OnPropertyChanged(nameof(AppControllers));
             ConfigManager.SaveConfig(Config);
         }
         
@@ -68,7 +75,7 @@ public class MainWindowModel : INotifyPropertyChanged {
         comPortListener.StopListening();
         comPortListener.Dispose();
         
-        if (AppControllers == null) AppControllers = new List<AppController>();
+        if (AppControllers == null) AppControllers = new ObservableCollection<AppController>();
         if (!string.IsNullOrEmpty(PortName)) {
             comPortListener = new ComPortListener(PortName, BaudRate);
             comPortListener.DataReceived += GetData;

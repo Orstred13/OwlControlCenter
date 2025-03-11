@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.ObjectModel;
+using System.IO;
 using System.Text.Json;
 
 namespace OwlControlCenter;
@@ -35,7 +36,7 @@ public class ConfigManager {
 }
 
 public class Config {
-    public List<AppController> AppControllers { get; set; }
+    public ObservableCollection<AppController> AppControllers { get; set; }
     public string PortName { get; set; } = "COM7";
     public int BaudRate { get; set; } = 9600;
 }

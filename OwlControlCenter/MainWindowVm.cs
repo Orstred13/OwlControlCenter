@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.Input;
 
@@ -18,7 +19,7 @@ public class MainWindowVm : INotifyPropertyChanged {
         RerunCommand = new RelayCommand(() => model.Rerun());
     }
 
-    public List<AppController> AppControllers {
+    public ObservableCollection<AppController> AppControllers {
         get => model.AppControllers;
         set {
             model.AppControllers = value;
